@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class HomeController {
-    @GetMapping("/")
+    @GetMapping("/teste")
     public ResponseEntity<String> teste(){
         return ResponseEntity.ok("Teste");
     }
