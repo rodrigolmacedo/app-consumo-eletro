@@ -1,16 +1,11 @@
 package com.fiap.grupo9.appconsumoeletro.dominio;
 
 public class Endereco {
-    String cep;
-    String end;
-    String numero;
-    String bairro;
-    String cidade;
-
-    String uf;
-    String complemento;
-
-
-
-
+    private String cep;
+    private String end;
+    private String numero;
+    private String bairro;
+    private String cidade;
+    private String uf;
+    private String complemento;
 }
