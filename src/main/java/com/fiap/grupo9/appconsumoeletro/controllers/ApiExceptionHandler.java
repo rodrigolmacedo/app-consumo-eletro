@@ -1,5 +1,8 @@
 package com.fiap.grupo9.appconsumoeletro.controllers;
 
+import com.fiap.grupo9.appconsumoeletro.exceptions.EnderecoJaCadastradoException;
+import com.fiap.grupo9.appconsumoeletro.exceptions.EnderecoNaoEncontradoException;
+import com.fiap.grupo9.appconsumoeletro.exceptions.LimiteRepositorioException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -13,6 +16,18 @@ import java.util.Map;
 
 @ControllerAdvice
 public class ApiExceptionHandler {
+    @ExceptionHandler({
+            EnderecoJaCadastradoException.class,
+            EnderecoNaoEncontradoException.class,
+            LimiteRepositorioException.class
+    })
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    ResponseEntity<?> handleEnderecoExceptions(Exception e){
+        Map<String, String> errors = new HashMap<>();
+        errors.put("Erro", e.getMessage());
+        return ResponseEntity.badRequest().body(errors);
+    }
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     ResponseEntity<?> handle(MethodArgumentNotValidException e) {
