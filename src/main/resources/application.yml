@@ -1,5 +1,7 @@
 
 springdoc:
-  version: '@springdoc.version@'
   swagger-ui:
     use-root-path: true
+spring:
+  web:
+    locale: pt_BR
