@@ -1,7 +1,7 @@
 package com.fiap.grupo9.appconsumoeletro.controllers;
 
 import com.fiap.grupo9.appconsumoeletro.controllers.form.EnderecoForm;
-import com.fiap.grupo9.appconsumoeletro.controllers.mapper.EnderecoMapper;
+import com.fiap.grupo9.appconsumoeletro.controllers.mapper.ModelMapper;
 import com.fiap.grupo9.appconsumoeletro.dominio.Endereco;
 import com.fiap.grupo9.appconsumoeletro.repositorio.EnderecoRepository;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,12 +12,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -30,7 +28,7 @@ public class EnderecoController {
 
     private final Validator validator;
     private final EnderecoRepository enderecoRepository;
-    private final EnderecoMapper enderecoMapper;
+    private final ModelMapper modelMapper;
 
     @Operation(summary = "Cadastrar novo endereço", description = "Cadastrar novo endereço", tags = { "Endereço" })
     @ApiResponses(value = {
@@ -44,7 +42,7 @@ public class EnderecoController {
         if(!violacoes.isEmpty())
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(violacoes);
 
-        Endereco endereco = enderecoMapper.getMapper().map(enderecoForm, Endereco.class);
+        var endereco = modelMapper.getMapper().map(enderecoForm, Endereco.class);
 
         endereco = enderecoRepository.salvarEndereco(endereco);
 
@@ -58,13 +56,13 @@ public class EnderecoController {
     @GetMapping("/{cep}")
     public ResponseEntity<?> encontrarEnderecoPorCEP(@Valid @NotBlank @PathVariable("cep") String cep){
 
-        List<Endereco> enderecoPeloCEP = enderecoRepository.getEnderecosPeloCEP(cep);
+        var enderecoPeloCEP = enderecoRepository.getEnderecosPeloCEP(cep);
 
         return ResponseEntity.ok().body(enderecoPeloCEP);
     }
 
     private <T> Map<Path, String> validar(T form) {
-        Set<ConstraintViolation<T>> violacoes = Validation.buildDefaultValidatorFactory().getValidator().validate(form);
+        Set<ConstraintViolation<T>> violacoes = validator.validate(form);
         return violacoes.stream().collect(Collectors.toMap(
                 ConstraintViolation::getPropertyPath, ConstraintViolation::getMessage
         ));
