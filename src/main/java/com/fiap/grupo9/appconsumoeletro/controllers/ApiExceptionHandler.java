@@ -1,5 +1,6 @@
 package com.fiap.grupo9.appconsumoeletro.controllers;
 
+import com.fiap.grupo9.appconsumoeletro.exceptions.DominioException;
 import com.fiap.grupo9.appconsumoeletro.exceptions.EnderecoJaCadastradoException;
 import com.fiap.grupo9.appconsumoeletro.exceptions.EnderecoNaoEncontradoException;
 import com.fiap.grupo9.appconsumoeletro.exceptions.LimiteRepositorioException;
@@ -16,11 +17,7 @@ import java.util.Map;
 
 @ControllerAdvice
 public class ApiExceptionHandler {
-    @ExceptionHandler({
-            EnderecoJaCadastradoException.class,
-            EnderecoNaoEncontradoException.class,
-            LimiteRepositorioException.class
-    })
+    @ExceptionHandler(DominioException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     ResponseEntity<?> handleEnderecoExceptions(Exception e){
         Map<String, String> errors = new HashMap<>();
