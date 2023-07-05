@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 import javax.naming.LimitExceededException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
@@ -34,9 +36,28 @@ public class EnderecoRepository {
             throw new LimiteRepositorioException(String.format("Limite de %s atingido!", enderecoList.size()));
         }
 
+        endereco.setUuid(UUID.randomUUID());
         enderecoList.add(endereco);
 
         return endereco;
 
+    }
+
+    public void atualizarEndereco(UUID uuid, Endereco endereco) {
+        Endereco enderecoEncontrado = enderecoList.stream().filter(enderecoItem -> enderecoItem.getUuid().equals(uuid))
+                .findFirst()
+                .orElseThrow(() -> new EnderecoNaoEncontradoException(String.format("Endereço com uuid:%s não encontrado.", uuid)));
+
+        enderecoEncontrado.setComplemento(endereco.getComplemento());
+        enderecoEncontrado.setNumero(endereco.getNumero());
+        enderecoList.set(enderecoList.indexOf(enderecoEncontrado), enderecoEncontrado);
+    }
+
+    public void removerEndereco(UUID uuid){
+        Endereco enderecoEncontrado = enderecoList.stream().filter(enderecoItem -> enderecoItem.getUuid().equals(uuid))
+                .findFirst()
+                .orElseThrow(() -> new EnderecoNaoEncontradoException(String.format("Endereço com uuid:%s não encontrado.", uuid)));
+
+        enderecoList.remove(enderecoEncontrado);
     }
 }
