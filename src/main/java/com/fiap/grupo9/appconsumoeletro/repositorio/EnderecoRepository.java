@@ -43,22 +43,19 @@ public class EnderecoRepository {
     }
 
     public void atualizarEndereco(UUID uuid, Endereco endereco) {
-        enderecoMap.computeIfPresent(uuid, (key, enderecoEncontrado) -> {
-            enderecoEncontrado.setComplemento(endereco.getComplemento());
-            enderecoEncontrado.setNumero(endereco.getNumero());
-            return enderecoEncontrado;
-        });
-
-        throw new EnderecoNaoEncontradoException(String.format("Endereço com uuid:%s não encontrado.", uuid));
+        if(!enderecoMap.containsKey(uuid)) {
+            throw new EnderecoNaoEncontradoException(String.format("Endereço com uuid:%s não encontrado.", uuid));
+        }
+        Endereco enderecoSalvo = enderecoMap.get(uuid);
+        enderecoSalvo.setNumero(endereco.getNumero());
+        enderecoSalvo.setComplemento(endereco.getComplemento());
+        enderecoMap.put(uuid, enderecoSalvo);
     }
 
     public void removerEndereco(UUID uuid) {
-        boolean isEnderecoCadastrado = enderecoMap.containsKey(uuid);
-
-        if(!isEnderecoCadastrado){
+        if(!enderecoMap.containsKey(uuid)){
             throw new EnderecoNaoEncontradoException(String.format("Endereço com uuid:%s não encontrado.", uuid));
         }
-
         enderecoMap.remove(uuid);
     }
 
