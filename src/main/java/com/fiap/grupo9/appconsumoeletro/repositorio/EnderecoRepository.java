@@ -6,58 +6,63 @@ import com.fiap.grupo9.appconsumoeletro.exceptions.EnderecoNaoEncontradoExceptio
 import com.fiap.grupo9.appconsumoeletro.exceptions.LimiteRepositorioException;
 import org.springframework.stereotype.Component;
 
-import javax.naming.LimitExceededException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 @Component
 public class EnderecoRepository {
-    private List<Endereco> enderecoList = new ArrayList<>();
+    private final ConcurrentMap<UUID, Endereco> enderecoMap = new ConcurrentHashMap<>();
 
-    public List<Endereco> getEnderecoList(){
-        return this.enderecoList;
+    public List<Endereco> getEnderecoList() {
+        return List.copyOf(enderecoMap.values());
     }
 
-    public List<Endereco> getEnderecosPeloCEP(String CEP){
-        return this.enderecoList.stream().filter(endereco -> endereco.getCep().equalsIgnoreCase(CEP))
+    public List<Endereco> getEnderecosPeloCEP(String CEP) {
+        return enderecoMap.values().stream()
+                .filter(endereco -> endereco.getCep().equalsIgnoreCase(CEP))
                 .collect(Collectors.toList());
     }
 
     public Endereco salvarEndereco(Endereco endereco) throws EnderecoJaCadastradoException {
-
-        if(enderecoList.contains(endereco)){
+        if (enderecoMap.containsValue(endereco)) {
             throw new EnderecoJaCadastradoException(String.format("Endereco com CEP %s já cadastrado!", endereco.getCep()));
         }
 
-        if(enderecoList.size() > 100){
-            throw new LimiteRepositorioException(String.format("Limite de %s atingido!", enderecoList.size()));
+        if (enderecoMap.size() > 100) {
+            throw new LimiteRepositorioException(String.format("Limite de %s atingido!", enderecoMap.size()));
         }
 
         endereco.setUuid(UUID.randomUUID());
-        enderecoList.add(endereco);
+        enderecoMap.put(endereco.getUuid(), endereco);
 
         return endereco;
-
     }
 
     public void atualizarEndereco(UUID uuid, Endereco endereco) {
-        Endereco enderecoEncontrado = enderecoList.stream().filter(enderecoItem -> enderecoItem.getUuid().equals(uuid))
-                .findFirst()
-                .orElseThrow(() -> new EnderecoNaoEncontradoException(String.format("Endereço com uuid:%s não encontrado.", uuid)));
+        enderecoMap.computeIfPresent(uuid, (key, enderecoEncontrado) -> {
+            enderecoEncontrado.setComplemento(endereco.getComplemento());
+            enderecoEncontrado.setNumero(endereco.getNumero());
+            return enderecoEncontrado;
+        });
 
-        enderecoEncontrado.setComplemento(endereco.getComplemento());
-        enderecoEncontrado.setNumero(endereco.getNumero());
-        enderecoList.set(enderecoList.indexOf(enderecoEncontrado), enderecoEncontrado);
+        throw new EnderecoNaoEncontradoException(String.format("Endereço com uuid:%s não encontrado.", uuid));
     }
 
-    public void removerEndereco(UUID uuid){
-        Endereco enderecoEncontrado = enderecoList.stream().filter(enderecoItem -> enderecoItem.getUuid().equals(uuid))
-                .findFirst()
-                .orElseThrow(() -> new EnderecoNaoEncontradoException(String.format("Endereço com uuid:%s não encontrado.", uuid)));
+    public void removerEndereco(UUID uuid) {
+        boolean isEnderecoCadastrado = enderecoMap.containsKey(uuid);
 
-        enderecoList.remove(enderecoEncontrado);
+        if(!isEnderecoCadastrado){
+            throw new EnderecoNaoEncontradoException(String.format("Endereço com uuid:%s não encontrado.", uuid));
+        }
+
+        enderecoMap.remove(uuid);
+    }
+
+    public Optional<Endereco> buscarEnderecoPorUUID(UUID uuid) {
+        return Optional.ofNullable(enderecoMap.get(uuid));
     }
 }
