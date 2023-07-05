@@ -1,8 +1,10 @@
 package com.fiap.grupo9.appconsumoeletro.dominio;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public class Endereco {
+    private UUID uuid;
     private String cep;
     private String end;
     private String numero;
@@ -65,6 +67,14 @@ public class Endereco {
 
     public void setComplemento(String complemento) {
         this.complemento = complemento;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
     }
 
     @Override
