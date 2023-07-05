@@ -110,7 +110,7 @@ public class EnderecoController {
             @ApiResponse(responseCode = "200", description = "Sucesso", content = @Content),
             @ApiResponse(responseCode = "404", description = "Endereço não encontrado", content = @Content)
     })
-    @GetMapping("/buscar/{uuid}")
+    @GetMapping("/{uuid}")
     public ResponseEntity<?> buscarEnderecoPorUUID(@Valid @PathVariable("uuid") UUID uuid) {
         Optional<Endereco> enderecoOptional = enderecoRepository.buscarEnderecoPorUUID(uuid);
 
